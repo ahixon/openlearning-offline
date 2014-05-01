@@ -1,13 +1,16 @@
-= openlearning-offline =
+openlearning-offline
+====================
 
 Mark and view task submissions offline, and with your text editor!
 
-== Requirements ==
+Requirements
+------------
 
 * Python 2.6+
-* An OpenLearning account that is a "tutor".
+* An OpenLearning account that can access the marking panel.
 
-== How to use ==
+How to use
+----------
 
 1) Login to OpenLearning. You only need to do this once.
 
