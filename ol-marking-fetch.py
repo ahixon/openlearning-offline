@@ -110,7 +110,11 @@ def main ():
 
 					subtimerow = row.find ('td', {'class': 'submissionTimeCell'})
 					subtimestr = subtimerow.string.strip()
-					subtime = datetime.datetime.strptime (subtimestr, "%Y-%m-%dT%H:%M:%S.%fZ")
+					try:
+						subtime = datetime.datetime.strptime (subtimestr, "%Y-%m-%dT%H:%M:%S.%fZ")
+					except ValueError:
+						# try without milliseconds (thanks Randal)
+						subtime = datetime.datetime.strptime (subtimestr, "%Y-%m-%dT%H:%M:%SZ")
 
 					sublink = row.find ('td', {'class' : 'submissionLinkCell'})
 					sublink = sublink.find ('a')
@@ -134,7 +138,10 @@ def main ():
 					if os.path.exists ('%s/current' % studir):
 						cf = open('%s/current' % studir)
 						current_disk = cf.read().strip()
-						current_disk = datetime.datetime.strptime (current_disk, "%Y-%m-%dT%H:%M:%S.%fZ")
+						try:
+							current_disk = datetime.datetime.strptime (current_disk, "%Y-%m-%dT%H:%M:%S.%fZ")
+						except ValueError:
+							current_disk = datetime.datetime.strptime (current_disk, "%Y-%m-%dT%H:%M:%SZ")
 						cf.close ()
 					else:
 						current_disk = datetime.datetime.min
