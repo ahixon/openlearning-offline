@@ -6,8 +6,20 @@ Mark and view task submissions offline, and with your text editor!
 Requirements
 ------------
 
-* Python 2.6+
-* An OpenLearning account that can access the marking panel.
+*   Python 2.6+
+
+*   Beautiful Soup 3 (http://www.crummy.com/software/BeautifulSoup/bs3/)
+    Install with `pip install BeautifulSoup` or `easy_install BeautifulSoup`
+
+*   An OpenLearning account that can access the marking panel.
+
+=== Using at CSE ===
+
+This should work out of the box in the banjo labs at UNSW CSE. I don't know
+about other labs.
+
+The login servers don't have Beautiful Soup though, so you'll need to grab
+that and put it in the current directoy if you'ved SSH'd in.
 
 How to use
 ----------
