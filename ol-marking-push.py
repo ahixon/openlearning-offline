@@ -166,7 +166,7 @@ def main ():
 	for u in unmarked_users:
 		print '\t%s' % u
 
-	print "\nTotal: %d submissions (%.2f%% marked)" % (len(marked_users) + len(draft_users) + len(unmarked_users), (float(len(marked_users)) / (len(unmarked_users) + len(draft_users)) * 100))
+	print "\nTotal: %d submissions (%.2f%% marked)" % (len(marked_users) + len(draft_users) + len(unmarked_users), (float(len(marked_users)) / (len(unmarked_users) + len(marked_users)) * 100))
 
 if __name__ == "__main__":
 	main ()
