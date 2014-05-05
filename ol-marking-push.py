@@ -131,7 +131,7 @@ def main ():
 					continue
 				
 
-				if 'AF' in line:
+				if not 'NOTICK' in line:
 					print "\t\tMarking task as complete..."
 					mark_data = {
 						'activityId': (activityId),
