@@ -89,8 +89,8 @@ def main ():
 
 		if os.path.exists ('%s/mark' % utaskdir):
 			marking = open('%s/mark' %utaskdir)
-			line = marking.readline().strip()
-			if line == "MARKED":
+			line = map(str.split, marking.readline().split (','))
+			if 'MARKED' in line:
 				print "\tSubmitting marks for %s" % username
 
 				cid = open('%s/contentid' % utaskdir).read().strip()
@@ -115,7 +115,7 @@ def main ():
 				# do some csrf bullshit
 				csrf = None
 				for cookie in cj:
-					print cookie
+					#print cookie
 					if 'csrf' in cookie.name:
 						csrf = cookie.value
 
@@ -131,19 +131,22 @@ def main ():
 					continue
 				
 
-				print "\t\tMarking task as complete..."
-				mark_data = {
-					'activityId': (activityId),
-					'userId': stu[username]['userId'],
-					'completed': 'true',
-					'cohortId': (cohortId),
-					'groupPath': ''
-				}
+				if 'AF' in line:
+					print "\t\tMarking task as complete..."
+					mark_data = {
+						'activityId': (activityId),
+						'userId': stu[username]['userId'],
+						'completed': 'true',
+						'cohortId': (cohortId),
+						'groupPath': ''
+					}
 
-				grade_page = "https://www.openlearning.com/api/mark/?action=setMarkComplete"
-				print grade_page
-				http_data =  urllib.urlencode (mark_data.items())
-				opener.open (grade_page, data=http_data)
+					grade_page = "https://www.openlearning.com/api/mark/?action=setMarkComplete"
+					#print grade_page
+					http_data =  urllib.urlencode (mark_data.items())
+					opener.open (grade_page, data=http_data)
+				else:
+					print "\t\tNot marking as complete, since task was marked as AF"
 
 				# save local state
 				open('%s/marked' % utaskdir, 'w').close()	# mark as marked
