@@ -104,7 +104,7 @@ def main ():
 				commentdoc = commentcontainer['data-document']
 
 				comment_content =  marking.read()
-				comment_content.replace ("\n", "<br />")
+				comment_content = comment_content.replace ("\n", "<br />")
 
 				export_data = {
 					'document': commentdoc,
