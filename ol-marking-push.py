@@ -89,7 +89,7 @@ def main ():
 
 		if os.path.exists ('%s/mark' % utaskdir):
 			marking = open('%s/mark' %utaskdir)
-			line = map(str.split, marking.readline().split (','))
+			line = map(str.strip, marking.readline().split (','))
 			if 'MARKED' in line:
 				print "\tSubmitting marks for %s" % username
 
