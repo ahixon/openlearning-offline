@@ -13,7 +13,7 @@ Requirements
 
 *   An OpenLearning account that can access the marking panel.
 
-=== Using at CSE ===
+### Using at CSE ###
 
 This should work out of the box in the banjo labs at UNSW CSE. I don't know
 about other labs.
