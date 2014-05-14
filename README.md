@@ -24,35 +24,15 @@ that and put it in the current directoy if you'ved SSH'd in.
 How to use
 ----------
 
-1.  Login to OpenLearning. You only need to do this once.
+1. Edit config.example as required, and copy to ~/.openlearning/config
+2. Add ol.py to $PATH. Working on getting setuptools to install it to /usr/bin for you.
+3. ol.py pull <confignickname> <activity>
+4. Edit <activity>/<user>/marks as appropriate.
+5. Go into activity dir, and do `ol.py push` as you need. Only marking comments not marked as
+   draft will be submitted.
 
-2.  Edit `olsettings.py` as required. You will need your session ID from your
-    browser session.
-
-    It might help if you're set to "Remember me" when logged in.
-
-3.  Run `ol-marking-groups.py` to fetch student enrollment info from your
-    groups.
-
-4.  Run `ol-marking-fetch.py <ACTIVITY>` to get submissions. You can run this as
-    many times as your want, and updated submissions will be downloaded (unless
-    you have marked them locally).
-
-    Page submissions will be extracted from the JSON and put into their own HTML
-    page.
-
-5.  Mark the submissions. You can view the submission in the relevant folder
-    under `tasks/`, and add your comments in `marks`.
-
-    You can use whatever HTML the comment editor supports.
-
-    When you're done, just make sure the first line of the marking file is
-    `MARKED` (without quotes) otherwise the 'push' tool will think you're still
-    writing your marking comments and leave them as a draft.
-
-6.  Run `ol-marking-push.py <ACTIVITY>` as you're going along, to upload your
-    marking comments and status back to OpenLearning. If you haven't finished 
-    marking a student's work, it won't be uploaded.
+You might also want to view <activity>/index.html for submission and marking info.
+Use `ol.py index` to rebuild.
 
 Disclaimer
 ----------

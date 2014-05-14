@@ -13,7 +13,7 @@ COHORT = "ClassOf2014"
 #
 # Firefox is something similar.
 # If you're on IE -- you're on your own.
-SESSIONID = ""
+SESSIONID = "VscLjXZ6SeBZSEAjYVczTnLVphE65Q4QxAYrk3ipKMI="
 
 # Tutorial group names you are teaching
 GROUPS = [

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import sys
 import os
 import ConfigParser
@@ -33,10 +34,17 @@ def get_students (ol, groups_dir, group_list, force_sync=False):
             with open (group_filename, 'wb') as f:
                 f.write (json.dumps (data))
 
+            for stu in data:
+                stu['group'] = group
+
             students.extend (data)
         else:
             with open(group_filename) as f:
-                students.extend (json.loads (f.read()))
+                data = json.loads (f.read())
+                for stu in data:
+                    stu['group'] = group
+
+                students.extend (data)
 
     return students
 
@@ -117,13 +125,23 @@ def generate_index (basedir, task, activity_config, user_config, groups_dir, ol_
 
     seen_students = []
 
+    current_course = activity_config.get('activity', 'usercourse')
+    cohort = user_config.get(activity_config.get('activity', 'usercourse'), 'cohort')
+    course = user_config.get(activity_config.get('activity', 'usercourse'), 'course')
+    
+    web = OLWeb (cohort, course, os.path.join(ol_dir, '.ol_cookies_' + current_course), login_handler)
+    group_list = user_config.get(activity_config.get('activity', 'usercourse'), 'groups')
+    group_list = map(str.strip, group_list.split(','))
+    students = get_students (web, groups_dir, group_list)
+    students_hash = get_uid_map (students)
+
     index = "<html><head><title>Submissions for %s</title>" % task
     index += "<style>"
     index += "body { background-color: #3a3b39; color: #fff } a { color: #eeeeec; } "
     index += "table { border-collapse:collapse; cell-padding: 6px; } td,th { padding: 0.4em }"
     index += "</style>"
     index += "</head><body><h1>Submissions for %s</h1>" % (task)
-    index += "<table><tr><th>Name</th><th>Submission</th><th>Due date delta</th><th></th><th>Mark</th><th>OL upload</th><th>SMS upload</tr>"
+    index += "<table><tr><th>Name</th><th>Group</th><th>Submission</th><th>Due date delta</th><th></th><th>Mark</th><th>OL upload</th><th>SMS upload</tr>"
     for sub in glob.glob (os.path.join (basedir, '*/submission.html')):
         link = sub.replace (basedir, '.')
         userdir = os.path.sep.join (sub.split (os.path.sep)[:-1])
@@ -157,7 +175,7 @@ def generate_index (basedir, task, activity_config, user_config, groups_dir, ol_
 
         markColors = {
             'HD': 'green',
-            'D': 'lightgreen',
+            'DN': 'lightgreen; color: black',
             'CR': 'grey',
             'PS': 'purple',
             'PC': 'orange',
@@ -172,25 +190,20 @@ def generate_index (basedir, task, activity_config, user_config, groups_dir, ol_
         else:
             edit = ""
 
-        if submission_info.has_option ('submission', 'uploaded_ol'):
+        if submission_info.has_option ('submission', 'marked'):
             uploaded_ol = "&#10004;"
+            uploaded_ol_style = "background-color: green;"
         else:
             uploaded_ol = ""
+            uploaded_ol_style = ""
 
         online_link = 'https://www.openlearning.com/content/%s' % submission_info.get ('submission', 'content_id')
-        index += "<tr><td>%s</td><td><a href='%s'>Local</a>, <a href='%s'>Online</a></td><td style='background-color: %s'>%s</td><td>%s</td><td style='background-color: %s'>%s</td><td>%s</td><td></td></tr>" % (submission_info.get ('user', 'name'), link, online_link, deltaStyle, delta, edit, markStyle, markStr, uploaded_ol)
+        group = students_hash[submission_info.get ('user', 'id')]['group']
+        index += "<tr><td>%s</td><td>%s</td><td><a href='%s'>Local</a>, <a href='%s'>Online</a></td><td style='background-color: %s'>%s</td><td>%s</td><td style='background-color: %s'>%s</td><td style='text-align: center; %s'>%s</td><td></td></tr>" % (submission_info.get ('user', 'name'), group, link, online_link, deltaStyle, delta, edit, markStyle, markStr, uploaded_ol_style, uploaded_ol)
 
         seen_students.append (submission_info.get ('user', 'id'))
 
     # now do everyone who didn't submit stuff
-    current_course = activity_config.get('activity', 'usercourse')
-    cohort = user_config.get(activity_config.get('activity', 'usercourse'), 'cohort')
-    course = user_config.get(activity_config.get('activity', 'usercourse'), 'course')
-    
-    web = OLWeb (cohort, course, os.path.join(ol_dir, '.ol_cookies_' + current_course), login_handler)
-    group_list = user_config.get(activity_config.get('activity', 'usercourse'), 'groups')
-    group_list = map(str.strip, group_list.split(','))
-    students = get_students (web, groups_dir, group_list)
 
     for student in students:
         if student['userId'] not in seen_students:
@@ -198,7 +211,7 @@ def generate_index (basedir, task, activity_config, user_config, groups_dir, ol_
                 bad = "background-color: red"
             else:
                 bad = ""
-            index += "<tr><td>%s</td><td></td><td style='%s'>No submission</td><td></td><td></td><td></td><td></td></tr>" % (student['fullName'], bad)
+            index += "<tr><td>%s</td><td>%s</td><td></td><td style='%s'>No submission</td><td></td><td></td><td></td><td></td></tr>" % (student['fullName'], student['group'], bad)
 
     index += "</table><p><small>Generated at %s</small></p>" % datetime.datetime.now()
     index += "</html>"
@@ -206,6 +219,84 @@ def generate_index (basedir, task, activity_config, user_config, groups_dir, ol_
     html = open ('%s/index.htm' % basedir, 'wb')
     html.write (index)
     html.close()
+
+def push_activity (ol_dir, activity_config, user_config, basedir, groups_dir):
+    global current_course
+
+    current_course = activity_config.get('activity', 'usercourse')
+    cohort = user_config.get(activity_config.get('activity', 'usercourse'), 'cohort')
+    course = user_config.get(activity_config.get('activity', 'usercourse'), 'course')
+    
+    web = OLWeb (cohort, course, os.path.join(ol_dir, '.ol_cookies_' + current_course), login_handler)
+    group_list = user_config.get(activity_config.get('activity', 'usercourse'), 'groups')
+    group_list = map(str.strip, group_list.split(','))
+
+    activity_name = activity_config.get('activity', 'name')
+    activities = None
+
+    if not activity_config.has_option ('activity', 'valid'):
+        print "Invalid activity. Try to pull."
+        sys.exit(1)
+
+    students = get_students (web, groups_dir, group_list)
+    uid_map = get_uid_map (students)
+
+    for username in os.listdir (basedir):
+        userdir = os.path.join (basedir, username)
+        if os.path.isdir (username):
+            if os.path.exists ('%s/.ol_submission' % userdir):
+                submission_config = ConfigParser.RawConfigParser()
+                submission_config.read ('%s/.ol_submission' % userdir)
+
+                if not submission_config.has_option ('submission', 'marked'):
+                    # check markfile to see if we're still draft
+                    markfile = open('%s/marks' % userdir)
+                    mark_tags = map(str.strip, markfile.readline().lower().split (','))
+
+                    mark_dict = {}
+
+                    for tag in mark_tags:
+                        if '=' in tag:
+                            tag = tag.split('=')
+                            mark_dict[tag[0]] = tag[1]
+                        else:
+                            mark_dict[tag] = True
+
+                    if 'draft' not in mark_dict:
+                        print "Submitting mark for %s..." % submission_config.get ('user', 'name')
+                        print "\tPosting comment..."
+
+                        # tag student
+                        comment_content = '@%s\n\n' % submission_config.get ('user', 'nick')
+
+                        # attach marker comment
+                        comment_content += markfile.read()
+
+                        # append mark info
+                        if 'mark' in mark_dict:
+                            comment_content += "\n\nFinal mark: %s" % mark_dict['mark'].upper()
+                        else:
+                            comment_content += "\n\nNo final mark given."
+
+                        #print comment_content
+
+                        # new lines get replaced with line breaks inside post_comment
+                        if not web.post_comment (submission_config.get ('submission', 'content_id'), comment_content):
+                            print "\tPosting comment failed, skipping"
+                            continue
+
+                        print "\tMarking as complete..."
+                        web.tick_activity (submission_config.get ('submission', 'activity_id'),
+                            submission_config.get ('user', 'id'),
+                            submission_config.get ('submission', 'cohort_id'))
+
+                        submission_config.set ('submission', 'marked', 'true')
+
+                        with open('%s/%s' % (userdir, '.ol_submission'), 'wb') as configfile:
+                            submission_config.write (configfile)
+                            
+    generate_index (basedir, activity_name, activity_config, user_config, groups_dir, ol_dir)
+
 
 def pull_activity (ol_dir, activity_config, user_config, basedir, groups_dir):
     global current_course
@@ -286,7 +377,7 @@ def pull_activity (ol_dir, activity_config, user_config, basedir, groups_dir):
             print "Fetching submission from", user_info['fullName']
             fetch_submission (web, activity_name, submission, user_info, checkout_dir)
 
-    generate_index (basedir, activity_name, activity_config)
+    generate_index (basedir, activity_name, activity_config, user_config, groups_dir, ol_dir)
     
     activity_config.set ('activity', 'latest', int(time.mktime(new_latest.timetuple())))
     with open('%s/%s' % (basedir, '.ol_activity'), 'wb') as configfile:
@@ -364,6 +455,13 @@ def main ():
         activities = web.get_activities()
         for act in activities:
             sys.stderr.write ("%s\n" % act['slug'])
+    elif sys.argv[0] == 'push':
+        if not os.path.isfile ('.ol_activity'):
+            sys.stderr.write ('This folder is not an OpenLearning activity. Change directory, or use `push <course> <activity>`.\n')
+            sys.exit (1)
+
+        config.read ('.ol_activity')
+        push_activity (ol_dir, config, user_config, '.', groups_dir)
     elif sys.argv[0] == 'index':
         basedir = '.'
         config.read ('%s/.ol_activity' % basedir)

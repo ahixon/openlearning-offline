@@ -108,7 +108,7 @@ class OLWeb(object):
         return result
     
     def post_to_json (self, url, post_dict):
-        resp = post_to (url, post_dict)
+        resp = self.post_to (url, post_dict)
         jcomment = json.loads (resp)
         return jcomment['success']
 
@@ -129,7 +129,7 @@ class OLWeb(object):
             'content': comment
         }
 
-        return self.post_to_json ('https://www.openlearning.com/commenting/add/', export_data)
+        return self.post_to_json ('https://www.openlearning.com/commenting/add/', post_data)
 
     def get_activity_path (self, task):
         return 'courses/%s/Activities/%s' % (self.course_name, task)
@@ -222,10 +222,10 @@ class OLWeb(object):
     def get_activities (self):
         dates = self._get_json ('https://www.openlearning.com/api/cohort/dates?cohort=courses/%s/Cohorts/%s' % (self.course_name, self.cohort))
 
-        # wtf? it's encoded as a string again?
+        # FIXME: wtf? it's encoded as a string again?
         dates = json.loads(dates['cohortDates'])
         
-        # FIXME: we might want module dates too
+        # TODO: we might want module dates too
         acts = []
         for module in dates['modules']:
             acts.extend (map (lambda y: OLWeb._fix_activity(self, y), module['activities']))
@@ -234,3 +234,15 @@ class OLWeb(object):
 
     def get_group_json (self, groupname):
         return self._get_json ("https://www.openlearning.com/data/group/?groupPath=courses/%s/Cohorts/%s/Groups/%s" % (self.course_name, self.cohort, groupname))
+
+
+    def tick_activity (self, activity_id, user_id, cohort_id):
+        mark_data = {
+            'activityId': activity_id,
+            'userId': user_id,
+            'completed': 'true',
+            'cohortId': cohort_id,
+            'groupPath': ''
+        }
+
+        return self.post_to_json ("https://www.openlearning.com/api/mark/?action=setMarkComplete", mark_data)
