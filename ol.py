@@ -383,11 +383,15 @@ def pull_activity (ol_dir, activity_config, user_config, basedir, groups_dir):
     with open('%s/%s' % (basedir, '.ol_activity'), 'wb') as configfile:
         activity_config.write (configfile)
 
+## BIG ASS TODO: make these functions generic enough so that we can pass in any environment
+## and the operation should work regardless (ie a user dir vs a whole activity)
+## ALSO: need to hide all this 'config' yuckiness into a class or something.
 def main ():
-    global user_config
+    global user_config      # FIXME: this needs to go - see above.
 
+    # FIXME: see above.
     if len(sys.argv) < 2 or not ((sys.argv[1] == 'pull' and (len(sys.argv) == 4 or len(sys.argv) == 2)) or len(sys.argv) == 2):
-        sys.stderr.write ('Usage: %s pull|pull <course> <activity>|pull|push|set-marked|sms-sync|group-sync\n' % sys.argv[0])
+        sys.stderr.write ('Usage: %s pull|pull <course> <activity>|activities|push|index\n' % sys.argv[0])
         sys.exit(1)
 
     sys.argv = sys.argv[1:]

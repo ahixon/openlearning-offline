@@ -18,6 +18,9 @@ class ScrapeError (Exception):
 class ForbiddenError (Exception):
     pass
 
+class AlreadyStartedError (Exception):
+    pass
+
 class OLWeb(object):
     def __init__ (self, cohort, course_name, cookie_file=None, login_handler=None):
         if cookie_file:
@@ -246,3 +249,35 @@ class OLWeb(object):
         }
 
         return self.post_to_json ("https://www.openlearning.com/api/mark/?action=setMarkComplete", mark_data)
+
+    """
+    Returns an file stream containing a CSV file of the marks for all students, for a given activity, otherwise all activities.
+    """
+    def get_csv_stream (self, activity=None):
+        req = self._get_json ("https://www.openlearning.com/api/mark/getExportMarkTaskProgress/")
+        if not req['completed']:
+            raise AlreadyStartedError ()
+
+        export_created = self.post_to_json ("https://www.openlearning.com/api/mark/createExportMarkTaskProgress/", {
+            'activity': activity or ""
+        })
+
+        if not export_created['success']:
+            return None
+
+        started = False
+        while not started:
+            resp = self._get_json ("https://www.openlearning.com/api/mark/checkExportMarkTaskStarted/?currentExport=%s" % export_created['currentLatestExportId'])
+            if not ['started']:
+                #print "Failed to start. Sleeping for one second, then retrying..."
+                time.sleep (1)
+
+        #print "Export started."
+        finished = False
+        while not finished:
+            req = self._get_json ("https://www.openlearning.com/api/mark/getExportMarkTaskProgress/")
+            finished = req['completed']
+            #print "Completed %f%%" % req['progress']
+
+        # ok we can download it now
+        return opener.open ("https://www.openlearning.com/marking/getLatestExport")
