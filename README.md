@@ -24,9 +24,10 @@ that and put it in the current directoy if you'ved SSH'd in.
 How to use
 ----------
 
-1. Edit config.example as required, and copy to ~/.openlearning/config
-2. Add ol.py to $PATH. Working on getting setuptools to install it to /usr/bin for you.
-3. ol.py pull <confignickname> <activity>
+1. Edit config.example as required, and copy to ~/.openlearning/config. The profile name is
+   in square brackets. In the example config, this is '1917'.
+2. sudo python setup.py install
+3. ol.py pull <profile name> <activity>, eg `ol.py pull 1917 PortfolioMidwayA`
 4. Edit <activity>/<user>/marks as appropriate.
 5. Go into activity dir, and do `ol.py push` as you need. Only marking comments not marked as
    draft will be submitted.
