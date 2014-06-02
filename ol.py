@@ -297,6 +297,8 @@ def push_activity (ol_dir, activity_config, user_config, basedir, groups_dir):
                             
     generate_index (basedir, activity_name, activity_config, user_config, groups_dir, ol_dir)
 
+def page_print (pg):
+    print "[*] Loading page %d..." % pg
 
 def pull_activity (ol_dir, activity_config, user_config, basedir, groups_dir):
     global current_course
@@ -346,7 +348,7 @@ def pull_activity (ol_dir, activity_config, user_config, basedir, groups_dir):
 
     # loop over all submissions we have
     new_latest = datetime.datetime.now()
-    for submission in web.get_submissions (activity_name):
+    for submission in web.get_submissions (activity_name, page_callback=page_print):
         if not activity_config.has_option ('activity', 'cohortid'):
             activity_config.set('activity', 'cohortid', submission['cohortid'])
             activity_config.set('activity', 'activityid', submission['activityid'])
@@ -374,7 +376,7 @@ def pull_activity (ol_dir, activity_config, user_config, basedir, groups_dir):
                     #print "\tskipping, had newer"
                     continue
 
-            print "Fetching submission from", user_info['fullName']
+            print "    Fetching submission from", user_info['fullName']
             fetch_submission (web, activity_name, submission, user_info, checkout_dir)
 
     generate_index (basedir, activity_name, activity_config, user_config, groups_dir, ol_dir)

@@ -58,6 +58,11 @@ class OLWeb(object):
             if ex.code == 401:
                 bad_permissions = True
                 content = ''
+            elif ex.code == 502:
+                # wait a second, and try again
+                time.sleep (1)
+                #print "OpenLearning broke..."
+                return self.get_page_content (url)
             else:
                 raise ex
 
@@ -107,7 +112,14 @@ class OLWeb(object):
             ('X-Requested-With', 'XMLHttpRequest')]
 
         post_data = urllib.urlencode (post_dict.items())
-        result = self.opener.open (url, data=post_data).read()
+        try:
+            result = self.opener.open (url, data=post_data).read()
+        except urllib2.HTTPError, ex:
+            if ex.code == 502:
+                # wait a second, and try again
+                time.sleep (1)
+                return self.post_to (url, post_dict)
+
         return result
     
     def post_to_json (self, url, post_dict):
@@ -146,10 +158,13 @@ class OLWeb(object):
     """
     Returns an iterator over all the submissions for a particular activity.
     """
-    def get_submissions (self, activity=''):
+    def get_submissions (self, activity='', page_callback=None):
         page = 1
         had_submissions = True
         while had_submissions:
+            if page_callback:
+                page_callback (page)
+            
             had_submissions = False
             url = "https://www.openlearning.com/marking?activity=%s&cohort=%s&page=%d" % (
                 self.get_activity_path (activity), self.get_cohort_path (), page)
