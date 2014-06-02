@@ -12,7 +12,7 @@ setup(
     name = "ol-offline",
     version = "0.1.0",
 
-    install_requires = ['BeautifulSoup >= 3.2']
+    install_requires = ['BeautifulSoup >= 3.2'],
 
     author = "Alex Hixon",
     author_email = "alex@alexhixon.com",
@@ -30,5 +30,5 @@ setup(
         "Development Status :: 3 - Alpha",
         "Topic :: Utilities",
         "License :: OSI Approved :: MIT License",
-    ]
+    ],
 )
