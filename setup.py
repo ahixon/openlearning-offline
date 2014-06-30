@@ -23,7 +23,7 @@ setup(
     url = "https://github.com/ahixon/openlearning-offline",
 
     packages = find_packages (),
-    scripts = ['ol.py'],
+    scripts = ['ol.py', 'ol-sms.py'],
 
     #long_description = read('README'),
     classifiers = [

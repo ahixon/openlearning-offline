@@ -26,20 +26,41 @@ How to use
 
 1. Edit config.example as required, and copy to ~/.openlearning/config. The profile name is
    in square brackets. In the example config, this is '1917'.
-2. sudo python setup.py install
-3. ol.py pull <profile name> <activity>, eg `ol.py pull 1917 PortfolioMidwayA`
-4. Edit <activity>/<user>/marks as appropriate.
+2. `sudo python setup.py install`
+3. `ol.py pull <profile name> <activity>`, eg `ol.py pull 1917 PortfolioMidwayA`
+4. Edit `<activity>/<user>/marks` as appropriate.
 5. Go into activity dir, and do `ol.py push` as you need. Only marking comments not marked as
    draft will be submitted.
 
-You might also want to view <activity>/index.html for submission and marking info.
+You might also want to view `<activity>/index.html` for submission and marking info.
 Use `ol.py index` to rebuild.
+
+Uploading to SMS (UNSW CSE only)
+--------------------------------
+
+Once you've finished marking, use `ol-sms.py` in your path (or run it straight
+from this folder). 
+
+You need to give it the SMS field name it should upload marks to (eg craft_final).
+You can also optionally give it a directory name where it should look for all the 
+student submissions.
+
+It will prompt you for your CSE login details. These are not stored.
+
+The script is currently hardcoded for 14s1, and COMP1917. It's unlikely
+it'll get used for anything else, except possibly a later session, but
+these are easily changed at the top of the script.
 
 Disclaimer
 ----------
 
 I am sorry to anyone who has to read my terrible code I hacked up this
 afternoon. I'll happily accept merge requests to clean it up!
+
+This may violate the OpenLearning Terms of Service. Please consider
+before using. If in doubt about your legal situation, seek the advice of
+a legal professional. I am not subject to any liabilty for your (mis)use
+of this software. See license text below for more information.
 
 License
 -------
