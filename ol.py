@@ -116,6 +116,18 @@ def get_mark (dir):
     except:
         return (True, '??')
 
+from collections import defaultdict
+
+def median(mylist):
+    sorts = sorted(mylist)
+    length = len(sorts)
+    if not length % 2:
+       return (sorts[length / 2] + sorts[length / 2 - 1]) / 2.0
+    return sorts[length / 2]
+
+def average (l):
+    return float(sum(l))/len(l) if len(l) > 0 else float('nan')
+
 def generate_index (basedir, task, activity_config, user_config, groups_dir, ol_dir):
     # generate new HTML page
     try:
@@ -142,6 +154,20 @@ def generate_index (basedir, task, activity_config, user_config, groups_dir, ol_
     index += "</style>"
     index += "</head><body><h1>Submissions for %s</h1>" % (task)
     index += "<table><tr><th>Name</th><th>Group</th><th>Submission</th><th>Due date delta</th><th></th><th>Mark</th><th>OL upload</th><th>SMS upload</tr>"
+
+    scoreListNum = []
+    scoreListStr = []
+
+    # should give compressed gumleaf?
+    scores = {
+        'HD': 85.0,
+        'DN': 75.0,
+        'CR': 65.0,
+        'PS': 50.0,
+        'PC': 46.0,
+        'FL': 0.0,
+    }
+
     for sub in glob.glob (os.path.join (basedir, '*/submission.html')):
         link = sub.replace (basedir, '.')
         userdir = os.path.sep.join (sub.split (os.path.sep)[:-1])
@@ -184,6 +210,10 @@ def generate_index (basedir, task, activity_config, user_config, groups_dir, ol_
             '??': ''
         }
 
+        if mark != 'AF' and mark != '??':
+            scoreListStr.append (mark)
+            scoreListNum.append (scores[mark])
+
         markStyle = markColors[mark]
         if draft:
             edit = "&#9998;"
@@ -213,7 +243,11 @@ def generate_index (basedir, task, activity_config, user_config, groups_dir, ol_
                 bad = ""
             index += "<tr><td>%s</td><td>%s</td><td></td><td style='%s'>No submission</td><td></td><td></td><td></td><td></td></tr>" % (student['fullName'], student['group'], bad)
 
-    index += "</table><p><small>Generated at %s</small></p>" % datetime.datetime.now()
+    index += "<tr><td colspan='6' align='right'><b>Average of %d:</b></td><td><b>%.2f</b></td></tr>" % (len (scoreListNum), average (scoreListNum))
+    index += "<tr><td colspan='6' align='right'><b>Median of %d:</b></td><td><b>%s</b></td></tr>" % (len (scoreListNum), median (scoreListNum))
+
+    index += "</table>"
+    index += "<p><small>Generated at %s</small></p>" % datetime.datetime.now()
     index += "</html>"
 
     html = open ('%s/index.htm' % basedir, 'wb')
