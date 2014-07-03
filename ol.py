@@ -243,8 +243,9 @@ def generate_index (basedir, task, activity_config, user_config, groups_dir, ol_
                 bad = ""
             index += "<tr><td>%s</td><td>%s</td><td></td><td style='%s'>No submission</td><td></td><td></td><td></td><td></td></tr>" % (student['fullName'], student['group'], bad)
 
-    index += "<tr><td colspan='6' align='right'><b>Average of %d:</b></td><td><b>%.2f</b></td></tr>" % (len (scoreListNum), average (scoreListNum))
-    index += "<tr><td colspan='6' align='right'><b>Median of %d:</b></td><td><b>%s</b></td></tr>" % (len (scoreListNum), median (scoreListNum))
+    if scoreListNum:
+        index += "<tr><td colspan='6' align='right'><b>Average of %d:</b></td><td><b>%.2f</b></td></tr>" % (len (scoreListNum), average (scoreListNum))
+        index += "<tr><td colspan='6' align='right'><b>Median of %d:</b></td><td><b>%s</b></td></tr>" % (len (scoreListNum), median (scoreListNum))
 
     index += "</table>"
     index += "<p><small>Generated at %s</small></p>" % datetime.datetime.now()
